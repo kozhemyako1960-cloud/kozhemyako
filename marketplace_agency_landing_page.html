@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketBoost AI // Комплексное продвижение и ведение на маркетплейсах (WB, Ozon, Я.Маркет)</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js CDN for interactive case graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts: Inter & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            950: '#090D16',
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                            600: '#475569'
+                        },
+                        accent: {
+                            blue: '#3B82F6',
+                            purple: '#8B5CF6',
+                            orange: '#F97316',
+                            emerald: '#10B981',
+                            wb: '#A855F7',
+                            ozon: '#005BFF',
+                            yandex: '#FFCC00'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glow-purple {
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(15, 23, 42, 0) 70%);
+        }
+
+        .glow-blue {
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(15, 23, 42, 0) 70%);
+        }
+
+        .glow-orange {
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.2) 0%, rgba(15, 23, 42, 0) 70%);
+        }
+
+        /* Custom range styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: #334155;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #F97316;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.8);
+            transition: transform 0.15s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Toast animation */
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-animate {
+            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-accent-orange selection:text-white relative overflow-x-hidden">
+
+    <!-- Social Proof Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 left-5 z-[90] max-w-sm pointer-events-none">
+        <div id="social-proof-toast" class="hidden pointer-events-auto glass-panel p-4 rounded-2xl border border-accent-blue/40 shadow-2xl flex items-center gap-3 toast-animate">
+            <div class="w-10 h-10 rounded-full bg-accent-blue/20 text-accent-blue flex items-center justify-center text-lg flex-shrink-0 border border-accent-blue/40">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="text-xs">
+                <p class="text-white font-bold" id="toast-title">Алексей из Москвы</p>
+                <p class="text-slate-300" id="toast-desc">Получил расчет ROI для Ozon (+290%)</p>
+                <span class="text-[10px] text-slate-500 font-mono" id="toast-time">2 минуты назад</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Lead Modal -->
+    <div id="lead-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 relative border border-slate-700 shadow-2xl relative overflow-hidden" id="modal-box">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="modal-form-content">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-orange/20 border border-accent-orange/40 text-accent-orange text-xs font-bold mb-3">
+                    <i class="fa-solid fa-bolt"></i> <span id="modal-badge-text">Бесплатный экспресс-аудит</span>
+                </div>
+                <h3 class="text-2xl font-black text-white mb-2" id="modal-heading">Забронировать стратегию роста</h3>
+                <p class="text-slate-300 text-xs sm:text-sm mb-6" id="modal-subheading">Заполните форму, и наш ведущий маркетолог свяжется с вами для разбора вашего магазина.</p>
+
+                <form onsubmit="handleUniversalForm(event)" class="space-y-4">
+                    <input type="hidden" id="modal-source-tag" value="General Audit Modal">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Ваше имя</label>
+                        <input type="text" required placeholder="Екатерина" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-accent-blue transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Телефон / Telegram</label>
+                        <input type="text" required placeholder="+7 (999) 000-00-00 или @username" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-accent-blue transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Маркетплейс</label>
+                        <select id="modal-marketplace-select" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent-blue transition-colors">
+                            <option value="Wildberries">Wildberries</option>
+                            <option value="Ozon">Ozon</option>
+                            <option value="Яндекс Маркет">Яндекс Маркет</option>
+                            <option value="Мегамаркет">Мегамаркет</option>
+                            <option value="Мультиплощадка">Несколько площадок / Еще не вышли</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Ссылка на бренд или товар (необязательно)</label>
+                        <input type="text" placeholder="https://..." class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-accent-blue transition-colors">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-accent-orange to-amber-500 hover:from-amber-500 hover:to-accent-orange text-white font-bold py-4 rounded-xl text-sm shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all transform hover:scale-[1.01]">
+                        Получить аудит и стратегию
+                    </button>
+                    <p class="text-[11px] text-center text-slate-500">
+                        <i class="fa-solid fa-lock text-slate-600"></i> Гарантируем конфиденциальность данных по NDA
+                    </p>
+                </form>
+            </div>
+
+            <!-- Modal Success Screen -->
+            <div id="modal-success-content" class="hidden text-center py-8 space-y-4">
+                <div class="w-16 h-16 bg-accent-emerald/20 text-accent-emerald rounded-full flex items-center justify-center text-3xl mx-auto border border-accent-emerald/40 shadow-lg">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="text-2xl font-black text-white">Заявка принята!</h3>
+                <p class="text-slate-300 text-sm max-w-xs mx-auto">
+                    Эксперт по маркетплейсам уже готовит предварительную аналитику. Мы свяжемся с вами в течение 15 минут.
+                </p>
+                <div class="bg-navy-950 p-4 rounded-2xl border border-slate-800 text-xs text-slate-400">
+                    💡 <strong class="text-white">Пока ожидаете:</strong> Подготовьте доступы к кабинету продавца в режиме «Аналитика», чтобы аудит был максимально точным.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="fixed top-0 left-0 w-full z-50 glass-panel border-b border-slate-800/80 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-accent-blue via-accent-purple to-accent-orange p-[2px] shadow-lg shadow-purple-500/20">
+                        <div class="w-full h-full bg-navy-950 rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid fa-robot text-accent-blue text-lg group-hover:rotate-12 transition-transform"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xl font-black tracking-tight text-white font-heading">MarketBoost</span>
+                            <span class="text-xs px-1.5 py-0.5 rounded bg-accent-blue/20 text-accent-blue font-bold border border-accent-blue/30">AI</span>
+                        </div>
+                        <span class="text-[10px] block text-slate-400 font-medium uppercase tracking-widest">Агентство №1 по росту продаж</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden lg:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    <a href="#hero" class="hover:text-accent-blue transition-colors">Главная</a>
+                    <a href="#calculator" class="hover:text-accent-blue transition-colors">Калькулятор ROI</a>
+                    <a href="#quiz" class="hover:text-accent-blue transition-colors">Экспресс-Квиз</a>
+                    <a href="#cases" class="hover:text-accent-blue transition-colors">Кейсы</a>
+                    <a href="#pricing" class="hover:text-accent-blue transition-colors">Тарифы</a>
+                    <a href="#faq" class="hover:text-accent-blue transition-colors">FAQ</a>
+                </nav>
+
+                <!-- Phone & CTA Button -->
+                <div class="hidden md:flex items-center gap-6">
+                    <div class="text-right">
+                        <a href="tel:88005553535" class="text-sm font-bold text-white hover:text-accent-blue transition-colors block">8 (800) 555-35-35</a>
+                        <span class="text-[10px] text-accent-emerald flex items-center justify-end gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald animate-pulse"></span> Линия свободна
+                        </span>
+                    </div>
+                    <button onclick="openModal('Бесплатный аудит магазина', 'Запросить аудит')" class="bg-gradient-to-r from-accent-orange to-amber-500 hover:opacity-95 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-all hover:scale-105">
+                        Бесплатный аудит
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileNav()" class="lg:hidden text-slate-300 hover:text-white text-2xl">
+                    <i class="fa-solid fa-bars" id="mobile-nav-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-nav-dropdown" class="hidden lg:hidden bg-navy-950 border-b border-slate-800 px-6 py-6 space-y-4">
+            <a href="#hero" onclick="toggleMobileNav()" class="block text-slate-300 font-medium text-sm">Главная</a>
+            <a href="#calculator" onclick="toggleMobileNav()" class="block text-slate-300 font-medium text-sm">Калькулятор ROI</a>
+            <a href="#quiz" onclick="toggleMobileNav()" class="block text-slate-300 font-medium text-sm">Тест за 1 минуту</a>
+            <a href="#cases" onclick="toggleMobileNav()" class="block text-slate-300 font-medium text-sm">Результаты и кейсы</a>
+            <a href="#pricing" onclick="toggleMobileNav()" class="block text-slate-300 font-medium text-sm">Тарифы</a>
+            <a href="#faq" onclick="toggleMobileNav()" class="block text-slate-300 font-medium text-sm">Часто задаваемые вопросы</a>
+            <div class="pt-2 border-t border-slate-800 space-y-3">
+                <a href="tel:88005553535" class="text-sm font-bold text-white block">8 (800) 555-35-35</a>
+                <button onclick="toggleMobileNav(); openModal('Мобильная заявка', 'Бесплатный аудит');" class="w-full bg-accent-orange text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider">
+                    Запросить бесплатный аудит
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
+        <!-- Ambient Background Glows -->
+        <div class="absolute top-10 left-10 w-[500px] h-[500px] glow-purple pointer-events-none rounded-full blur-3xl"></div>
+        <div class="absolute top-40 right-10 w-[500px] h-[500px] glow-blue pointer-events-none rounded-full blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Main Offer -->
+                <div class="lg:col-span-7 space-y-6 text-left">
+                    
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-navy-800 border border-slate-700 text-xs font-semibold text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-accent-emerald animate-ping"></span>
+                        <span class="text-white font-bold">Умные алгоритмы 2026:</span> AI-оптимизация & АРК биддинг
+                    </div>
+
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.12] tracking-tight">
+                        Увеличим выручку на Wildberries и Ozon от <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue via-accent-purple to-accent-orange">+250% за 60 дней</span>
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed font-normal max-w-2xl">
+                        Берем на себя полное ведение и вывод карточек в ТОП-10. Используем нейросети для SEO-семантики, предиктивную рекламу и сочную инфографику. **Юридическая гарантия KPI в договоре.**
+                    </p>
+
+                    <!-- Key Benefit Bullets -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3 border border-slate-700/60">
+                            <div class="w-9 h-9 rounded-xl bg-accent-purple/20 text-accent-purple flex items-center justify-center text-base">
+                                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            </div>
+                            <div class="text-xs">
+                                <span class="block font-bold text-white">Разбор 15 параметров</span>
+                                <span class="text-slate-400">Находим скрытые потери бюджета</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3 border border-slate-700/60">
+                            <div class="w-9 h-9 rounded-xl bg-accent-blue/20 text-accent-blue flex items-center justify-center text-base">
+                                <i class="fa-solid fa-calculator"></i>
+                            </div>
+                            <div class="text-xs">
+                                <span class="block font-bold text-white">Пересбор Юнит-экономики</span>
+                                <span class="text-slate-400">Чистая маржа от 25% и выше</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3 border border-slate-700/60">
+                            <div class="w-9 h-9 rounded-xl bg-accent-orange/20 text-accent-orange flex items-center justify-center text-base">
+                                <i class="fa-solid fa-trophy"></i>
+                            </div>
+                            <div class="text-xs">
+                                <span class="block font-bold text-white">Вывод в ТОП-10 по ключам</span>
+                                <span class="text-slate-400">Белый органический рост</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3 border border-slate-700/60">
+                            <div class="w-9 h-9 rounded-xl bg-accent-emerald/20 text-accent-emerald flex items-center justify-center text-base">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="text-xs">
+                                <span class="block font-bold text-white">AI-Управление рекламой</span>
+                                <span class="text-slate-400">Снижение ДРР до 5-8%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Lead Form -->
+                    <div class="glass-panel p-5 rounded-2xl border border-accent-blue/30 shadow-2xl mt-4">
+                        <div class="text-xs font-bold text-slate-300 mb-3 flex items-center justify-between">
+                            <span>🔥 Запросить бесплатный разбор карточки за 0 ₽</span>
+                            <span class="text-accent-orange">Осталось 4 места на сегодня</span>
+                        </div>
+                        <form onsubmit="handleUniversalForm(event)" class="flex flex-col sm:flex-row gap-3">
+                            <input type="hidden" id="hero-form-tag" value="Hero Quick Capture">
+                            <input type="text" required placeholder="+7 (999) 000-00-00" class="flex-grow bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent-blue">
+                            <button type="submit" class="bg-gradient-to-r from-accent-orange to-amber-500 hover:opacity-95 text-white font-bold px-6 py-3 rounded-xl text-sm whitespace-nowrap shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">
+                                Получить аудит
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Right Column Interactive Dashboard Graphic -->
+                <div class="lg:col-span-5 relative">
+                    <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-700 shadow-2xl relative z-10 space-y-6">
+                        
+                        <!-- Header Badge -->
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <span class="text-xs font-mono text-accent-blue bg-accent-blue/10 px-2.5 py-1 rounded-md border border-accent-blue/20">
+                                MarketBoost_AI_Dashboard
+                            </span>
+                        </div>
+
+                        <!-- Realtime Growth Metric -->
+                        <div class="space-y-2">
+                            <div class="text-xs text-slate-400 uppercase font-semibold">Динамика продаж магазина (WB + Ozon)</div>
+                            <div class="text-3xl sm:text-4xl font-black text-white flex items-baseline gap-3">
+                                <span>8 420 000 ₽</span>
+                                <span class="text-xs font-bold text-accent-emerald bg-accent-emerald/10 px-2 py-1 rounded border border-accent-emerald/20">
+                                    +340% <i class="fa-solid fa-arrow-trend-up"></i>
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-400">Период работы: 60 дней. Категория: Одежда & Аксессуары</p>
+                        </div>
+
+                        <!-- Mini Visual Metrics -->
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div class="bg-navy-950 p-3 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-500 block uppercase font-bold">CTR Карточки</span>
+                                <span class="text-lg font-bold text-accent-purple">8.6% <span class="text-[10px] text-slate-400">(был 2.1%)</span></span>
+                            </div>
+                            <div class="bg-navy-950 p-3 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-500 block uppercase font-bold">ДРР (Реклама)</span>
+                                <span class="text-lg font-bold text-accent-emerald">5.4% <span class="text-[10px] text-slate-400">(был 21%)</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Guarantee Stamp Box -->
+                        <div class="bg-gradient-to-r from-accent-purple/20 to-accent-blue/20 p-4 rounded-2xl border border-accent-purple/30 flex items-center gap-3">
+                            <div class="text-2xl text-amber-400"><i class="fa-solid fa-award"></i></div>
+                            <div class="text-xs">
+                                <span class="font-bold text-white block">Гарантия в договоре:</span>
+                                <span class="text-slate-300">Если не достигаем согласованного роста продаж — возвращаем 100% стоимости услуг.</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Logos & Performance Stats -->
+    <section class="border-y border-slate-800 bg-navy-950/80 py-10 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-xs font-semibold text-slate-400 uppercase tracking-widest mb-6">Официальные технологические партнеры и площадки</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 items-center justify-items-center opacity-80 mb-10">
+                <div class="flex items-center gap-2 text-xl font-bold text-purple-400">
+                    <i class="fa-solid fa-bag-shopping text-2xl"></i> WILDBERRIES
+                </div>
+                <div class="flex items-center gap-2 text-xl font-bold text-blue-500">
+                    <i class="fa-solid fa-box text-2xl"></i> OZON
+                </div>
+                <div class="flex items-center gap-2 text-xl font-bold text-yellow-400">
+                    <i class="fa-solid fa-store text-2xl"></i> ЯНДЕКС МАРКЕТ
+                </div>
+                <div class="flex items-center gap-2 text-xl font-bold text-emerald-400">
+                    <i class="fa-solid fa-cart-flatbed text-2xl"></i> МЕГАМАРКЕТ
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center border-t border-slate-800/80 pt-8">
+                <div>
+                    <div class="text-2xl sm:text-3xl font-black text-white font-heading">2.4 млрд ₽</div>
+                    <p class="text-xs text-slate-400 mt-1">Оборот клиентов за 2025–2026 гг.</p>
+                </div>
+                <div>
+                    <div class="text-2xl sm:text-3xl font-black text-accent-orange font-heading">580+</div>
+                    <p class="text-xs text-slate-400 mt-1">Карточек выведено в ТОП-10</p>
+                </div>
+                <div>
+                    <div class="text-2xl sm:text-3xl font-black text-accent-blue font-heading">30 мин</div>
+                    <p class="text-xs text-slate-400 mt-1">Время подготовки первички аудита</p>
+                </div>
+                <div>
+                    <div class="text-2xl sm:text-3xl font-black text-accent-emerald font-heading">100%</div>
+                    <p class="text-xs text-slate-400 mt-1">Юридическая защита в договоре</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Calculator Section -->
+    <section id="calculator" class="py-24 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-accent-orange text-xs font-bold uppercase tracking-wider">Прогноз доходов</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white">Калькулятор потенциала роста выручки</h2>
+                <p class="text-slate-400 text-sm">Рассчитайте потенциальный оборот вашей продукции через 3 месяца работы с агентством.</p>
+            </div>
+
+            <div class="glass-panel p-8 sm:p-12 rounded-3xl border border-slate-700/80 shadow-2xl">
+                <div class="grid lg:grid-cols-12 gap-10 items-center">
+                    
+                    <!-- Controls Column -->
+                    <div class="lg:col-span-7 space-y-6">
+                        
+                        <!-- Marketplace selector buttons -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">1. Выберите площадку:</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button type="button" onclick="setCalcPlatform('wb')" id="calc-btn-wb" class="calc-pf-btn py-3 px-3 rounded-xl border border-accent-purple bg-accent-purple/20 text-white text-xs font-bold transition-all">
+                                    Wildberries
+                                </button>
+                                <button type="button" onclick="setCalcPlatform('ozon')" id="calc-btn-ozon" class="calc-pf-btn py-3 px-3 rounded-xl border border-slate-700 bg-navy-950 text-slate-400 text-xs font-bold hover:border-slate-500 transition-all">
+                                    Ozon
+                                </button>
+                                <button type="button" onclick="setCalcPlatform('yandex')" id="calc-btn-yandex" class="calc-pf-btn py-3 px-3 rounded-xl border border-slate-700 bg-navy-950 text-slate-400 text-xs font-bold hover:border-slate-500 transition-all">
+                                    Я.Маркет
+                                </button>
+                                <button type="button" onclick="setCalcPlatform('multi')" id="calc-btn-multi" class="calc-pf-btn py-3 px-3 rounded-xl border border-slate-700 bg-navy-950 text-slate-400 text-xs font-bold hover:border-slate-500 transition-all">
+                                    Мульти
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Current turnover range slider -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <label class="font-bold text-slate-300">2. Текущий оборот в месяц:</label>
+                                <span class="font-black text-accent-orange text-lg font-heading" id="calc-slider-display">1 000 000 ₽</span>
+                            </div>
+                            <input type="range" id="calc-range" min="100000" max="20000000" step="100000" value="1000000" oninput="runCalculator()">
+                            <div class="flex justify-between text-[11px] text-slate-500 font-mono">
+                                <span>100 тыс ₽</span>
+                                <span>10 млн ₽</span>
+                                <span>20 млн ₽</span>
+                            </div>
+                        </div>
+
+                        <!-- Category Selector -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">3. Категория товаров:</label>
+                            <select id="calc-category" onchange="runCalculator()" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-accent-blue">
+                                <option value="1.3">Одежда, обувь и аксессуары (+230%)</option>
+                                <option value="1.35">Красота, уход и косметика (+250%)</option>
+                                <option value="1.25">Товары для дома и интерьера (+210%)</option>
+                                <option value="1.4">Электроника и гаджеты (+280%)</option>
+                                <option value="1.2">Детские товары и игрушки (+190%)</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- Output Results Card -->
+                    <div class="lg:col-span-5">
+                        <div class="glass-card p-6 sm:p-8 rounded-2xl border border-accent-orange/40 bg-gradient-to-b from-navy-900 to-navy-950 text-center space-y-6 shadow-2xl relative overflow-hidden">
+                            <div class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Прогнозируемый результат (Через 90 дней)</div>
+
+                            <div>
+                                <div class="text-xs text-slate-400 mb-1">Прогнозируемая выручка:</div>
+                                <div class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-accent-emerald via-teal-300 to-white font-heading" id="calc-res-turnover">
+                                    3 300 000 ₽
+                                </div>
+                                <div class="inline-block mt-2 px-3 py-1 rounded-full bg-accent-emerald/10 text-accent-emerald text-xs font-bold border border-accent-emerald/20" id="calc-res-growth">
+                                    Прирост: +230%
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 text-left">
+                                <div>
+                                    <div class="text-[11px] text-slate-400">Чистая прибыль (эст.):</div>
+                                    <div class="text-base font-bold text-white mt-0.5" id="calc-res-profit">792 000 ₽</div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] text-slate-400">Окупаемость рекламы (ROAS):</div>
+                                    <div class="text-base font-bold text-accent-blue mt-0.5" id="calc-res-roas">480%</div>
+                                </div>
+                            </div>
+
+                            <button onclick="openModal('Фиксация расчета калькулятора', 'Забронировать стратегию')" class="w-full bg-gradient-to-r from-accent-orange to-amber-500 hover:opacity-95 text-white font-bold py-4 rounded-xl text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">
+                                Зафиксировать расчет и забронировать стратегию
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Quiz Section -->
+    <section id="quiz" class="py-24 bg-navy-950 border-y border-slate-800 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 space-y-3">
+                <span class="inline-block px-3 py-1 rounded-full bg-accent-purple/20 text-accent-purple text-xs font-bold border border-accent-purple/30">
+                    ⏱️ Занимает 1 минуту
+                </span>
+                <h2 class="text-3xl font-black text-white">Пройдите тест и получите индивидуальную стратегию + скидку 15%</h2>
+            </div>
+
+            <div class="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-700 shadow-2xl relative">
+                
+                <!-- Progress bar -->
+                <div class="mb-8">
+                    <div class="flex justify-between text-xs text-slate-400 mb-2 font-mono">
+                        <span>Шаг <span id="quiz-step-num">1</span> из 4</span>
+                        <span id="quiz-progress-percent">25% готово</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="quiz-progress-bar" class="bg-gradient-to-r from-accent-blue to-accent-purple h-full w-1/4 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Form Container -->
+                <form id="quiz-form" onsubmit="handleQuizSubmit(event)">
+                    
+                    <!-- Step 1 -->
+                    <div id="quiz-step-1" class="quiz-step space-y-6">
+                        <h3 class="text-xl font-bold text-white">На каком маркетплейсе вы торгуете или планируете запуск?</h3>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_platform" value="Wildberries" checked class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Wildberries</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_platform" value="Ozon" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Ozon</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_platform" value="Яндекс Маркет" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Яндекс Маркет</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_platform" value="Мультиплощадка" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Несколько площадок сразу</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div id="quiz-step-2" class="quiz-step hidden space-y-6">
+                        <h3 class="text-xl font-bold text-white">Каков ваш текущий ежемесячный оборот?</h3>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_turnover" value="Только планирую запуск" checked class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Только планирую запуск (0 ₽)</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_turnover" value="До 500 тыс руб" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">До 500 000 ₽ / мес</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_turnover" value="500 тыс - 3 млн руб" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">500 000 ₽ – 3 000 000 ₽ / мес</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_turnover" value="Свыше 3 млн руб" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Свыше 3 000 000 ₽ / мес</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div id="quiz-step-3" class="quiz-step hidden space-y-6">
+                        <h3 class="text-xl font-bold text-white">Главная проблема, которую нужно решить сейчас:</h3>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_pain" value="Слив рекламного бюджета" checked class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Слив рекламного бюджета (Высокий ДРР)</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_pain" value="Низкий CTR и мало кликов" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Низкий CTR карточки и плохое фото</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_pain" value="Застой в продажах" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Застой продаж на одном месте</span>
+                            </label>
+                            <label class="glass-card p-4 rounded-xl border border-slate-700 hover:border-accent-blue cursor-pointer flex items-center gap-3 transition-colors">
+                                <input type="radio" name="q_pain" value="Нужен аутсорс под ключ" class="accent-accent-orange">
+                                <span class="text-sm text-white font-medium">Нужна команда под ключ (Делегирование)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 (Contact info) -->
+                    <div id="quiz-step-4" class="quiz-step hidden space-y-6">
+                        <h3 class="text-xl font-bold text-white">Куда прислать готовый разбор и закрепить скидку 15%?</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Ваше имя</label>
+                                <input type="text" id="quiz-name" required placeholder="Иван" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent-blue">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Телефон / WhatsApp / Telegram</label>
+                                <input type="text" id="quiz-phone" required placeholder="+7 (999) 000-00-00" class="w-full bg-navy-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent-blue">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center pt-8 border-t border-slate-800">
+                        <button type="button" id="quiz-prev-btn" onclick="prevQuizStep()" class="hidden px-6 py-3 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors">
+                            <i class="fa-solid fa-arrow-left mr-2"></i> Назад
+                        </button>
+                        <div></div>
+                        <button type="button" id="quiz-next-btn" onclick="nextQuizStep()" class="bg-gradient-to-r from-accent-orange to-amber-500 hover:opacity-95 text-white font-bold px-8 py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all">
+                            Далее <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                        <button type="submit" id="quiz-submit-btn" class="hidden bg-gradient-to-r from-accent-emerald to-teal-400 hover:opacity-95 text-white font-bold px-8 py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all">
+                            Завершить и получить аудит
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- Quiz Success Screen -->
+                <div id="quiz-success" class="hidden text-center py-8 space-y-4">
+                    <div class="w-16 h-16 bg-accent-emerald/20 text-accent-emerald rounded-full flex items-center justify-center text-3xl mx-auto border border-accent-emerald/40">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-white">Тест пройден! Скидка 15% зафиксирована</h3>
+                    <p class="text-slate-300 text-sm max-w-md mx-auto">
+                        Мы формируем персональный отчет. Наш стратег свяжется с вами в течение 15 минут по указанному контакту.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Cases with Chart.js -->
+    <section id="cases" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+                <span class="text-accent-blue text-xs font-bold uppercase tracking-wider">Подтвержденные результаты</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white">Интерактивные кейсы роста выручки</h2>
+                <p class="text-slate-400 text-sm">Переключайте категории, чтобы изучить график динамики «Точка А → Точка Б».</p>
+            </div>
+
+            <!-- Case category tabs -->
+            <div class="flex justify-center mb-10 overflow-x-auto">
+                <div class="glass-panel p-1.5 rounded-2xl flex gap-2 border border-slate-800">
+                    <button onclick="switchCaseTab('apparel')" id="case-tab-apparel" class="case-tab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-accent-blue text-white shadow-lg transition-all">
+                        Одежда & Обувь
+                    </button>
+                    <button onclick="switchCaseTab('electronics')" id="case-tab-electronics" class="case-tab-btn px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all">
+                        Электроника
+                    </button>
+                    <button onclick="switchCaseTab('cosmetics')" id="case-tab-cosmetics" class="case-tab-btn px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all">
+                        Косметика
+                    </button>
+                    <button onclick="switchCaseTab('home')" id="case-tab-home" class="case-tab-btn px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all">
+                        Товары для дома
+                    </button>
+                </div>
+            </div>
+
+            <!-- Case Content Grid -->
+            <div class="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-700 shadow-2xl">
+                <div class="grid lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Chart Canvas Column -->
+                    <div class="lg:col-span-7 bg-navy-950 p-4 sm:p-6 rounded-2xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-mono text-slate-400" id="case-chart-title">Динамика выручки (руб/мес)</span>
+                            <span class="text-xs font-bold text-accent-emerald bg-accent-emerald/10 px-2 py-0.5 rounded border border-accent-emerald/20" id="case-growth-tag">+380%</span>
+                        </div>
+                        <div class="relative h-64 sm:h-80">
+                            <canvas id="caseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Case Info Column -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div>
+                            <span class="text-xs text-accent-purple font-bold uppercase tracking-wider block mb-1" id="case-platform-badge">Wildberries // Категория одежды</span>
+                            <h3 class="text-2xl font-bold text-white" id="case-title">Женские спортивные костюмы</h3>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 bg-navy-950 p-4 rounded-xl border border-slate-800">
+                            <div>
+                                <span class="text-[11px] text-slate-400 block">Точка A (До нас):</span>
+                                <span class="text-lg font-black text-slate-300 font-heading" id="case-point-a">420 000 ₽/мес</span>
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-400 block">Точка B (Через 60 дней):</span>
+                                <span class="text-lg font-black text-accent-emerald font-heading" id="case-point-b">2 016 000 ₽/мес</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Примененные инструменты:</h4>
+                            <ul class="text-xs text-slate-300 space-y-2" id="case-tools-list">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Переработка SEO-ядра с покрытием 98% кластеров</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Нейросетевая инфографика (CTR вырос с 2.4% до 7.9%)</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Настройка АРК рекламных кампаний через биддер</li>
+                            </ul>
+                        </div>
+
+                        <button onclick="openModal('Кейсы продаж', 'Хочу такой же результат')" class="w-full bg-gradient-to-r from-accent-blue to-accent-purple hover:opacity-95 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all">
+                            Хочу такой же результат в своей нише
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Pain vs Solution Section -->
+    <section class="py-24 bg-navy-950 border-y border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-accent-orange text-xs font-bold uppercase tracking-wider">Правда маркетплейсов</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white">Как делают 90% новичков vs Как работаем мы</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Bad Way -->
+                <div class="glass-card p-6 sm:p-8 rounded-3xl border border-red-500/30 space-y-6 relative">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold">
+                        <i class="fa-solid fa-xmark"></i> Как работают 90% продавцов
+                    </div>
+
+                    <ul class="space-y-4 text-xs sm:text-sm text-slate-300">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+                            <span>Составляют описание карточки на глаз без сбора LSI-ключевых слов.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+                            <span>Запускают авторекламу WB/Ozon на максимальных ставках, сливая бюджет за 2 дня.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+                            <span>Используют шаблонную инфографику с бирж, имеющую низкий кликаут (CTR < 2.5%).</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+                            <span>Делают серые самовыкупы, рискуя получить миллионные штрафы и блокировку кабинета.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- MarketBoost AI Way -->
+                <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-accent-emerald/40 space-y-6 relative shadow-2xl bg-gradient-to-b from-navy-900 to-navy-950">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20 text-xs font-bold">
+                        <i class="fa-solid fa-check"></i> Подход MarketBoost AI
+                    </div>
+
+                    <ul class="space-y-4 text-xs sm:text-sm text-slate-200">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-accent-emerald mt-1"></i>
+                            <span>Собираем 100% семантического ядра через нейросети и MPStats с регулярным обновлением.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-accent-emerald mt-1"></i>
+                            <span>Подключаем биддеры с искусственным интеллектом, удерживающие ТОП-позиции при минимальном ДРР.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-accent-emerald mt-1"></i>
+                            <span>Создаем воронку продаж в картинках с A/B тестами главного фото до достижения CTR > 7.5%.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-accent-emerald mt-1"></i>
+                            <span>Применяем только 100% белые методы продвижения без риска блокировок и штрафов.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services & Pricing Grid -->
+    <section id="pricing" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-accent-purple text-xs font-bold uppercase tracking-wider">Прозрачное ценообразование</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white">Тарифные планы продвижения</h2>
+                <p class="text-slate-400 text-sm">Выберите удобный формат сотрудничества. Все тарифы включают составление договора с KPI.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 items-stretch">
+                
+                <!-- Tariff 1 -->
+                <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Быстрый старт</span>
+                        <h3 class="text-2xl font-bold text-white mb-2">Тест-Драйв & SEO</h3>
+                        <p class="text-xs text-slate-400 mb-6">Полная оптимизация и упаковка для запуска или перезапуска карточек.</p>
+
+                        <div class="text-3xl font-black text-white mb-6 font-heading">
+                            29 000 ₽ <span class="text-xs font-normal text-slate-400">/ разово</span>
+                        </div>
+
+                        <ul class="space-y-3 text-xs text-slate-300 mb-8">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Полный LSI SEO-аудит (до 5 артикулов)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Дизайн инфографики (до 3 карточек)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Настройка Rich-контента / Заголовков</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Стартовая настройка авторекламы</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="openModal('Тариф Тест-Драйв & SEO', 'Заказать Тест-Драйв')" class="w-full glass-card hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider border border-slate-700 transition-colors">
+                        Заказать Тест-Драйв
+                    </button>
+                </div>
+
+                <!-- Tariff 2 (Popular) -->
+                <div class="glass-panel p-8 rounded-3xl border-2 border-accent-orange relative flex flex-col justify-between shadow-[0_0_30px_rgba(249,115,22,0.2)] bg-gradient-to-b from-navy-900 to-navy-950 scale-105 z-10">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent-orange text-white text-[10px] font-black uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
+                        Самый популярный 🔥
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-bold text-accent-orange uppercase tracking-widest block mb-2">Флагманский рост</span>
+                        <h3 class="text-2xl font-bold text-white mb-2">Продвижение в ТОП</h3>
+                        <p class="text-xs text-slate-400 mb-6">Ежемесячное ведение 1 площадки с юридической гарантией роста продаж.</p>
+
+                        <div class="text-3xl font-black text-white mb-6 font-heading">
+                            59 000 ₽ <span class="text-xs font-normal text-slate-400">+ % от прироста</span>
+                        </div>
+
+                        <ul class="space-y-3 text-xs text-slate-300 mb-8">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> SEO и регулярное обновление семантики</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Управление рекламой АРК через AI-биддеры</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> A/B тесты главных фото и обложек</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Контроль и оптимизация ДРР</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Персональный аккаунт-менеджер 24/7</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="openModal('Тариф Продвижение в ТОП', 'Забронировать тариф')" class="w-full bg-gradient-to-r from-accent-orange to-amber-500 hover:opacity-95 text-white font-bold py-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all">
+                        Забронировать тариф
+                    </button>
+                </div>
+
+                <!-- Tariff 3 -->
+                <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Аутсорсинг бизнеса</span>
+                        <h3 class="text-2xl font-bold text-white mb-2">Ведение под ключ</h3>
+                        <p class="text-xs text-slate-400 mb-6">Полная замена собственного отдела маркетплейсов для крупных селлеров.</p>
+
+                        <div class="text-3xl font-black text-white mb-6 font-heading">
+                            99 000 ₽ <span class="text-xs font-normal text-slate-400">+ % от оборота</span>
+                        </div>
+
+                        <ul class="space-y-3 text-xs text-slate-300 mb-8">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Мультиплощадочное ведение (WB + Ozon + Я.Маркет)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Расчет поставок FBO/FBS и планирование остатков</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Привлечение внешнего трафика (Блогеры, Директ)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-emerald"></i> Выделенный отдел: Маркетолог, Дизайнер, Аналитик</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="openModal('Тариф Ведение под ключ', 'Обсудить под ключ')" class="w-full glass-card hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider border border-slate-700 transition-colors">
+                        Обсудить ведение под ключ
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="py-24 bg-navy-950 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-accent-emerald text-xs font-bold uppercase tracking-wider">Отзывы партнеров</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white">Что говорят о нас селлеры</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex text-amber-400 text-xs">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-xs text-slate-500 font-mono">Wildberries</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        «Вышли с 500 тыс. до 3.8 млн рублей в нише автотоваров за 2.5 месяца! Команда отлично оптимизировала АРК кампании. ДРР упал с 19% до 6.2%. Рекомендую!»
+                    </p>
+                    <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
+                        <div class="w-9 h-9 rounded-full bg-accent-purple/20 text-accent-purple font-bold flex items-center justify-center text-xs">
+                            МК
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Михаил Ковалев</span>
+                            <span class="text-[10px] text-slate-500">Бренд AutoPro, WB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex text-amber-400 text-xs">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-xs text-slate-500 font-mono">Ozon</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        «Дизайн инфографики и Rich-контента просто космический! Конверсия в корзину взлетела мгновенно. Продажи выросли в 3 раза уже к концу первого месяца.»
+                    </p>
+                    <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
+                        <div class="w-9 h-9 rounded-full bg-accent-blue/20 text-accent-blue font-bold flex items-center justify-center text-xs">
+                            ЕА
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Елена Абрамова</span>
+                            <span class="text-[10px] text-slate-500">Косметика GlowSkin, Ozon</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex text-amber-400 text-xs">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-xs text-slate-500 font-mono">Мультиплощадка</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        «Передали весь отдел маркетплейсов на аутсорс. Забыли про проблему поставок и постоянный слив бюджета. Отчетность приходит каждый день в бот.»
+                    </p>
+                    <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
+                        <div class="w-9 h-9 rounded-full bg-accent-emerald/20 text-accent-emerald font-bold flex items-center justify-center text-xs">
+                            ДГ
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Дмитрий Григорьев</span>
+                            <span class="text-[10px] text-slate-500">Одежда NordStyle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-24 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 space-y-3">
+                <span class="text-accent-orange text-xs font-bold uppercase tracking-wider">Ответы на вопросы</span>
+                <h2 class="text-3xl font-black text-white">Часто задаваемые вопросы</h2>
+            </div>
+
+            <div class="space-y-4">
+                <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center text-sm sm:text-base hover:text-accent-blue transition-colors">
+                        <span>Как фиксируется гарантия результата в договоре?</span>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-ans hidden px-6 pb-6 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-800/50 pt-4">
+                        В договоре четко прописываются целевой объем выручки и максимальный порог ДРР. Если показатели не достигаются за согласованный период, мы продолжаем бесплатно работать до выполнения KPI или возвращаем полную стоимость услуг.
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center text-sm sm:text-base hover:text-accent-blue transition-colors">
+                        <span>Нужен ли доступ к личному кабинету продавца?</span>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-ans hidden px-6 pb-6 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-800/50 pt-4">
+                        Да, для работы мы запрашиваем ограниченный доступ через роль «Менеджер» или «Аналитик». Доступ к финансовым выплатам и смене реквизитов остается 100% под вашим контролем.
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
+                    <button onclick="toggleFaq(this)" class="w-full p-6 text-left font-bold text-white flex justify-between items-center text-sm sm:text-base hover:text-accent-blue transition-colors">
+                        <span>Используете ли вы серые выкупы или накрутки?</span>
+                        <i class="fa-solid fa-chevron-down text-sm transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-ans hidden px-6 pb-6 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-800/50 pt-4">
+                        Нет. Мы принципиально работаем только по белым технологиям: SEO-индексация, AI-управление авторекламой, A/B тестирование инфографики и привлечение целевого внешнего трафика.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final Conversion & Countdown Section -->
+    <section class="py-24 bg-gradient-to-b from-navy-950 via-navy-900 to-navy-950 border-t border-slate-800 relative">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel p-8 sm:p-14 rounded-3xl border border-accent-orange/40 shadow-2xl relative overflow-hidden">
+                <div class="grid lg:grid-cols-12 gap-10 items-center">
+                    
+                    <div class="lg:col-span-7 space-y-6">
+                        <span class="inline-block px-3.5 py-1.5 rounded-full bg-accent-orange/20 text-accent-orange border border-accent-orange/40 text-xs font-bold">
+                            ⏳ Спецпредложение ограниченного времени
+                        </span>
+
+                        <h2 class="text-3xl sm:text-4xl font-black text-white leading-tight">
+                            Получите бесплатный разбор карточки + 15% скидку при обращении сегодня
+                        </h2>
+
+                        <!-- Countdown Timer -->
+                        <div class="flex items-center gap-4 pt-2">
+                            <div class="text-center">
+                                <div id="timer-hours" class="w-14 h-14 bg-navy-950 rounded-xl border border-slate-700 flex items-center justify-center text-2xl font-black text-accent-orange font-heading">02</div>
+                                <span class="text-[10px] text-slate-400 font-mono mt-1 block">ЧАСА</span>
+                            </div>
+                            <span class="text-xl font-bold text-slate-600">:</span>
+                            <div class="text-center">
+                                <div id="timer-minutes" class="w-14 h-14 bg-navy-950 rounded-xl border border-slate-700 flex items-center justify-center text-2xl font-black text-white font-heading">45</div>
+                                <span class="text-[10px] text-slate-400 font-mono mt-1 block">МИНУТ</span>
+                            </div>
+                            <span class="text-xl font-bold text-slate-600">:</span>
+                            <div class="text-center">
+                                <div id="timer-seconds" class="w-14 h-14 bg-navy-950 rounded-xl border border-slate-700 flex items-center justify-center text-2xl font-black text-accent-emerald font-heading">18</div>
+                                <span class="text-[10px] text-slate-400 font-mono mt-1 block">СЕКУНД</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="lg:col-span-5">
+                        <div class="bg-navy-950 p-6 rounded-2xl border border-slate-700">
+                            <form onsubmit="handleUniversalForm(event)" class="space-y-4">
+                                <input type="hidden" id="final-form-tag" value="Final Countdown CTA">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-300 mb-1">Ваше имя</label>
+                                    <input type="text" required placeholder="Сергей" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-accent-blue">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-300 mb-1">Телефон / Telegram</label>
+                                    <input type="text" required placeholder="+7 (999) 000-00-00" class="w-full bg-navy-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-accent-blue">
+                                </div>
+                                <button type="submit" class="w-full bg-gradient-to-r from-accent-orange to-amber-500 hover:opacity-95 text-white font-bold py-4 rounded-xl text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all">
+                                    Забрать скидку 15% и аудит
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-navy-950 border-t border-slate-800 py-12 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg font-black text-white font-heading">MarketBoost AI</span>
+                    </div>
+                    <p class="text-slate-500">ООО «МаркетБуст АИ» // ОГРН 1247700123456 // ИНН 7701234567</p>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="https://t.me/" target="_blank" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 flex items-center justify-center text-lg transition-colors">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+                    <a href="https://whatsapp.com" target="_blank" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 flex items-center justify-center text-lg transition-colors">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                    <a href="tel:88005553535" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 flex items-center justify-center text-lg transition-colors">
+                        <i class="fa-solid fa-phone"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800/80 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 gap-3">
+                <p>&copy; 2026 MarketBoost AI. Все права защищены.</p>
+                <p>Результаты индивидуальны и зависят от качества товара и начальной экономики.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let caseChart = null;
+
+        const caseData = {
+            apparel: {
+                title: "Женские спортивные костюмы",
+                platform: "Wildberries // Категория одежды",
+                pointA: "420 000 ₽/мес",
+                pointB: "2 016 000 ₽/мес",
+                growth: "+380%",
+                labels: ["Месяц 1", "Месяц 2", "Месяц 3", "Месяц 4", "Месяц 5", "Месяц 6"],
+                datasetBefore: [400, 420, 410, 430, 420, 415],
+                datasetAfter: [420, 850, 1200, 1550, 1800, 2016],
+                tools: [
+                    "Переработка SEO-ядра с покрытием 98% кластеров",
+                    "Нейросетевая инфографика (CTR вырос с 2.4% до 7.9%)",
+                    "Настройка АРК рекламных кампаний через биддер"
+                ]
+            },
+            electronics: {
+                title: "Беспроводные TWS Наушники",
+                platform: "Ozon // Трафареты & Поиск",
+                pointA: "650 000 ₽/мес",
+                pointB: "2 850 000 ₽/мес",
+                growth: "+338%",
+                labels: ["Месяц 1", "Месяц 2", "Месяц 3", "Месяц 4", "Месяц 5", "Месяц 6"],
+                datasetBefore: [600, 650, 620, 640, 630, 650],
+                datasetAfter: [650, 1100, 1600, 2100, 2500, 2850],
+                tools: [
+                    "Внедрение Rich-контента и интерактивных схем",
+                    "Снижение ДРР в Трафаретах в 2.2 раза",
+                    "Подключение программы «Отзывы за баллы»"
+                ]
+            },
+            cosmetics: {
+                title: "Сыворотка с ретинолом",
+                platform: "Wildberries + Ozon",
+                pointA: "210 000 ₽/мес",
+                pointB: "1 250 000 ₽/мес",
+                growth: "+495%",
+                labels: ["Месяц 1", "Месяц 2", "Месяц 3", "Месяц 4", "Месяц 5", "Месяц 6"],
+                datasetBefore: [200, 210, 205, 215, 200, 210],
+                datasetAfter: [210, 450, 750, 980, 1120, 1250],
+                tools: [
+                    "Оптимизация состава и категорий под ключевые поиски",
+                    "A/B тестирование обложек (CTR вырос до 8.4%)",
+                    "Запуск рекламных интегрированных кампания у блогеров"
+                ]
+            },
+            home: {
+                title: "Органайзеры для кухни",
+                platform: "Яндекс Маркет + WB",
+                pointA: "300 000 ₽/мес",
+                pointB: "1 150 000 ₽/мес",
+                growth: "+283%",
+                labels: ["Месяц 1", "Месяц 2", "Месяц 3", "Месяц 4", "Месяц 5", "Месяц 6"],
+                datasetBefore: [290, 300, 295, 305, 298, 300],
+                datasetAfter: [300, 520, 720, 890, 1020, 1150],
+                tools: [
+                    "Настройка комплектов и группировки по цветам/размерам",
+                    "Автоматическая корректировка цен от конкурентов",
+                    "Буст продаж в поиске на Яндекс Маркете"
+                ]
+            }
+        };
+
+        function renderCaseChart(category) {
+            const data = caseData[category];
+            const ctx = document.getElementById('caseChart').getContext('2d');
+
+            if (caseChart) {
+                caseChart.destroy();
+            }
+
+            caseChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'С MarketBoost AI',
+                            data: data.datasetAfter,
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Без оптимизации',
+                            data: data.datasetBefore,
+                            borderColor: '#64748B',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.1,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94A3B8', font: { family: 'Inter', size: 11 } }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8' } }
+                    }
+                }
+            });
+
+            // Update UI elements
+            document.getElementById('case-title').innerText = data.title;
+            document.getElementById('case-platform-badge').innerText = data.platform;
+            document.getElementById('case-point-a').innerText = data.pointA;
+            document.getElementById('case-point-b').innerText = data.pointB;
+            document.getElementById('case-growth-tag').innerText = data.growth;
+
+            const listContainer = document.getElementById('case-tools-list');
+            listContainer.innerHTML = '';
+            data.tools.forEach(tool => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2';
+                li.innerHTML = `<i class="fa-solid fa-check text-accent-emerald"></i> ${tool}`;
+                listContainer.appendChild(li);
+            });
+        }
+
+        function switchCaseTab(cat) {
+            document.querySelectorAll('.case-tab-btn').forEach(btn => {
+                btn.className = "case-tab-btn px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all";
+            });
+            const active = document.getElementById(`case-tab-${cat}`);
+            active.className = "case-tab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-accent-blue text-white shadow-lg transition-all";
+            renderCaseChart(cat);
+        }
+
+        let selectedCalcPf = 'wb';
+
+        function setCalcPlatform(pf) {
+            selectedCalcPf = pf;
+            document.querySelectorAll('.calc-pf-btn').forEach(btn => {
+                btn.className = "calc-pf-btn py-3 px-3 rounded-xl border border-slate-700 bg-navy-950 text-slate-400 text-xs font-bold hover:border-slate-500 transition-all";
+            });
+            const active = document.getElementById(`calc-btn-${pf}`);
+            active.className = "calc-pf-btn py-3 px-3 rounded-xl border border-accent-purple bg-accent-purple/20 text-white text-xs font-bold transition-all";
+            runCalculator();
+        }
+
+        function runCalculator() {
+            const rangeVal = parseFloat(document.getElementById('calc-range').value);
+            document.getElementById('calc-slider-display').innerText = new Intl.NumberFormat('ru-RU').format(rangeVal) + ' ₽';
+
+            const catMult = parseFloat(document.getElementById('calc-category').value);
+            const predicted = rangeVal * catMult;
+            const growthPercent = Math.round(((predicted - rangeVal) / rangeVal) * 100);
+            const estProfit = predicted * 0.24;
+
+            document.getElementById('calc-res-turnover').innerText = new Intl.NumberFormat('ru-RU').format(Math.round(predicted)) + ' ₽';
+            document.getElementById('calc-res-growth').innerText = `Прирост: +${growthPercent}%`;
+            document.getElementById('calc-res-profit').innerText = new Intl.NumberFormat('ru-RU').format(Math.round(estProfit)) + ' ₽';
+        }
+
+        let currentQuizStep = 1;
+
+        function updateQuizUI() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`quiz-step-${i}`).classList.add('hidden');
+            }
+            document.getElementById(`quiz-step-${currentQuizStep}`).classList.remove('hidden');
+
+            document.getElementById('quiz-step-num').innerText = currentQuizStep;
+            document.getElementById('quiz-progress-percent').innerText = `${currentQuizStep * 25}% готово`;
+            document.getElementById('quiz-progress-bar').style.width = `${currentQuizStep * 25}%`;
+
+            // Navigation buttons
+            if (currentQuizStep === 1) {
+                document.getElementById('quiz-prev-btn').classList.add('hidden');
+            } else {
+                document.getElementById('quiz-prev-btn').classList.remove('hidden');
+            }
+
+            if (currentQuizStep === 4) {
+                document.getElementById('quiz-next-btn').classList.add('hidden');
+                document.getElementById('quiz-submit-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('quiz-next-btn').classList.remove('hidden');
+                document.getElementById('quiz-submit-btn').classList.add('hidden');
+            }
+        }
+
+        function nextQuizStep() {
+            if (currentQuizStep < 4) {
+                currentQuizStep++;
+                updateQuizUI();
+            }
+        }
+
+        function prevQuizStep() {
+            if (currentQuizStep > 1) {
+                currentQuizStep--;
+                updateQuizUI();
+            }
+        }
+
+        function handleQuizSubmit(e) {
+            e.preventDefault();
+            document.getElementById('quiz-form').classList.add('hidden');
+            document.getElementById('quiz-success').classList.remove('hidden');
+        }
+
+        const sampleToasts = [
+            { name: "Алексей из Москвы", desc: "Запросил расчет окупаемости для Ozon (+290%)", time: "2 мин назад" },
+            { name: "Мария из Екатеринбурга", desc: "Забронировала аудит карточки Wildberries", time: "Только что" },
+            { name: "Константин из СПБ", desc: "Выбрал тариф «Продвижение в ТОП»", time: "5 мин назад" },
+            { name: "Ирина из Новосибирска", desc: "Получила разбор юнит-экономики", time: "7 мин назад" }
+        ];
+
+        function triggerSocialProofToast() {
+            const toastBox = document.getElementById('social-proof-toast');
+            const randomData = sampleToasts[Math.floor(Math.random() * sampleToasts.length)];
+
+            document.getElementById('toast-title').innerText = randomData.name;
+            document.getElementById('toast-desc').innerText = randomData.desc;
+            document.getElementById('toast-time').innerText = randomData.time;
+
+            toastBox.classList.remove('hidden');
+
+            setTimeout(() => {
+                toastBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        function startCountdown() {
+            let totalSeconds = 2 * 3600 + 45 * 60 + 18;
+            setInterval(() => {
+                if (totalSeconds <= 0) return;
+                totalSeconds--;
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                const s = totalSeconds % 60;
+
+                document.getElementById('timer-hours').innerText = String(h).padStart(2, '0');
+                document.getElementById('timer-minutes').innerText = String(m).padStart(2, '0');
+                document.getElementById('timer-seconds').innerText = String(s).padStart(2, '0');
+            }, 1000);
+        }
+
+        function openModal(heading, btnText) {
+            if (heading) document.getElementById('modal-heading').innerText = heading;
+            const modal = document.getElementById('lead-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('lead-modal').classList.add('hidden');
+        }
+
+        function toggleFaq(btn) {
+            const ans = btn.nextElementSibling;
+            const icon = btn.querySelector('i');
+            ans.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        function toggleMobileNav() {
+            document.getElementById('mobile-nav-dropdown').classList.toggle('hidden');
+        }
+
+        function handleUniversalForm(e) {
+            e.preventDefault();
+            const modalBox = document.getElementById('modal-form-content');
+            if (modalBox) modalBox.classList.add('hidden');
+            const successBox = document.getElementById('modal-success-content');
+            if (successBox) successBox.classList.remove('hidden');
+        }
+
+        window.onload = function() {
+            renderCaseChart('apparel');
+            runCalculator();
+            startCountdown();
+
+            // Interval for live toast notifications
+            setTimeout(triggerSocialProofToast, 4000);
+            setInterval(triggerSocialProofToast, 18000);
+        };
+    </script>
+</body>
+</html>
